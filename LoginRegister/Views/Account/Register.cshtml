@@ -1,0 +1,184 @@
+﻿@model LoginRegister.Models.UserAccount
+
+@{
+    ViewBag.Title = "Register";
+}
+
+<h2>Rejestracja</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @if (ViewBag.Message != null)
+    {
+        <div class="form-group">
+            <div class="col-md-10">@ViewBag.Message</div>
+        </div>
+    }
+    <div class="form-group">
+        @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Password, "Hasło: ", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input class="form-control" id="Password" name="Password" type="password">
+            @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.ConfirmPassword, "Potwierdź hasło: ", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.ConfirmPassword, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        <div>
+            @(Html.CheckBoxFor(m => m.MinLength, new { id = "minL" }))<text> Minimalna długość hasła</text>
+            <input class="text-box single-line" id="minEdit" name="minEdit" type="text" value="0">
+
+        </div>
+        <div>
+            @(Html.CheckBoxFor(m => m.MaxLength, new { id = "maxL" }))<text> Maksymalna długość hasła</text>
+            <input class="text-box single-line" id="maxEdit" name="maxEdit" type="text" value="0">
+        </div>
+        <div>
+            @(Html.CheckBoxFor(m => m.SpecialChar, new { id = "SpecialChar" }))
+            <text> Minimum</text>
+            <input class="text-box single-line" id="SpecialEdit" name="SpecialEdit" type="text" value="0"><text> znaków specjalnych</text>
+        </div>
+        <div>
+            @(Html.CheckBoxFor(m => m.Numbers, new { id = "Numbers" }))
+            <text> Minimum</text>
+            <input class="text-box single-line" id="NumbersEdit" name="NumbersEdit" type="text" value="0"><text> cyfr</text>
+        </div>
+        <div>
+            @(Html.CheckBoxFor(m => m.Upper, new { id = "Upper" }))
+            <text> Minimum</text>
+            <input class="text-box single-line" id="UpperEdit" name="UpperEdit" type="text" value="0"><text> dużych liter</text>
+        </div>
+    </div>
+<div class="form-group">
+    <div class="col-md-offset-2 col-md-10">
+        <input type="submit" value="Create" class="btn-primary – Primary" onclick="AutoCalculateMandateOnChange()" />
+    </div>
+</div>
+</div>
+}
+
+<div>
+    <input type="button" class="btn-default" value="Strona główna" onclick="@("window.location.href='" + @Url.Action("Index", "Account") + "'");" />
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+
+<script type="text/javascript">
+    function AutoCalculateMandateOnChange() {
+        
+        var min = (parseInt(document.getElementById('minEdit').value));
+        var max = (parseInt(document.getElementById('maxEdit').value));
+        var spec = (parseInt(document.getElementById('SpecialEdit').value));
+        var num = (parseInt(document.getElementById('NumbersEdit').value));
+        var up = (parseInt(document.getElementById('UpperEdit').value));
+        var error = false;
+
+        if (document.getElementById("minL").checked & !error) {
+            var regex = new RegExp("^.{" + min.toString() + ",}$");
+            if (!regex.test(Password.value)) {
+                alert("Hasło musi zawierać minimum " + min + " znaki.");
+                Password.value = "";
+                error = true;
+            }
+        }
+        if (document.getElementById("maxL").checked & !error) {
+            var regex2 = new RegExp("^.{1," + max.toString() + "}$");
+            //var regex2 = new RegExp("^.*[1234567890-=!@@#$%^&*()_+A-Za-z]{1,"+max.toString()+"}$");
+            if (min > max) {
+                alert("Minimalna ilość znaków w haśle nie może być większa, niż maksymalna liczba znaków")
+            }
+            else {
+                if (!regex2.test(Password.value)) {
+                    alert("Hasło musi zawierać maksymalnie " + max + " znaków");
+                    Password.value = "";
+                    error = true;
+                }
+            }
+        }
+        if (document.getElementById("SpecialChar").checked && !error) {
+            String: v = "^.*(?=.*[!@@#$%^&*()]";
+            for (var i = 1; i < spec; i++) {
+                v += "+.*[!@@#$%^&*()]";
+            }
+            v += ")[A-Za-z1234567890!@@#$%^&*()]+$";
+            var regex3 = new RegExp(v);
+            //var regex3 = new RegExp("^.*(?=.*[!@@#$%^&*()]+.*[!@@#$%^&*()])[A-Za-z1234567890!@@#$%^&*()]+$");
+            if (spec > max && document.getElementById("maxL").checked) {
+                alert("Minimalna ilość znaków specjalnych w haśle nie może być większa, niż maksymalna liczba znaków");
+                error = true;
+            }
+            else {
+                    if (!regex3.test(Password.value)) {
+                        alert("Hasło musi zawierać minimalnie " + spec + " znaków specjalnych");
+                        Password.value = "";
+                        error = true;
+                    }
+                }
+        }
+        if (document.getElementById("Numbers").checked && !error) {
+            String: v = "^.*(?=.*[0123456789]";
+            for (var i = 1; i < num; i++) {
+                v += "+.*[0123456789]";
+            }
+            v += ")[A-Za-z1234567890!@@#$%^&*()]+$";
+            var regex4 = new RegExp(v);
+            if (spec > max && document.getElementById("maxL").checked) {
+                alert("Minimalna ilość cyfr w haśle nie może być większa, niż maksymalna liczba znaków");
+            }
+            else {
+                if (!regex4.test(Password.value)) {
+                    alert("Hasło musi zawierać minimalnie " + num + " cyfr");
+                    error = true;
+                    Password.value = "";
+                }
+            }
+        }
+        if (document.getElementById("Upper").checked && !error) {
+            String: v = "^.*(?=.*[A-Z]";
+            for (var i = 1; i < up; i++) {
+                v += "+.*[A-Z]";
+            }
+            v += ")[A-Za-z1234567890!@@#$%^&*()]+$";
+            var regex5 = new RegExp(v);
+            if (spec > max && document.getElementById("maxL").checked) {
+                alert("Minimalna ilość dużych liter w haśle nie może być większa, niż maksymalna liczba znaków");
+            }
+            else {
+                if (!regex5.test(Password.value)) {
+                    alert("Hasło musi zawierać minimalnie " + up + " dużych liter");
+                    error = true;
+                    Password.value = "";
+                }
+            }
+        }
+        if ((up + num + spec) > max && !error) {
+            alert("Suma minimum znaków specjalnych, cyfr i dużych liter przekracza dozwoloną liczbę znaków.");
+            Password.value = "";
+            error = true;
+        }
+    }
+</script>
